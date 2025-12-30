@@ -10,8 +10,6 @@ ci/application/cache/*
 uploads/*
 !uploads/.gitkeep
 
-# Environment specific config
-ci/application/config/database.php
 
 # IDE and OS files
 .DS_Store
