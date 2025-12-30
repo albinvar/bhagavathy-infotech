@@ -1,0 +1,52 @@
+.dashoboardform input[type=text], .dashoboardform input[type=text], .dashoboardform input[type=number], .dashoboardform input[type=date], .dashoboardform input[type=time], .dashoboardform textarea{
+    border: 1px solid var(--ct-input-border-color);
+    border-radius: 0.2rem;
+    width: 100%;
+}
+.dashboarditems>.table>:not(caption)>*>*{
+    padding: 3px;
+}
+.dashboarditems table th, .dashboarditems table td{
+    color: #343434;
+}
+.dashoboardform {
+    color: #343434;
+}
+.dashamountfield{
+    width: 150px;
+    height: 33px;
+}
+.inputfieldcss{
+    height: 33px;
+    border: 1px solid var(--ct-input-border-color);
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.2rem;
+}
+.footrtable td{
+    padding: 5px;
+}
+.bg-gray-300 {
+    background-color: #d1d5db!important;
+}
+.searchdropdown{
+    color: #000;
+    padding: 5px;
+    display: block;
+    font-size: 13px;
+    border-bottom: 1px solid var(--ct-input-border-color);
+}
+.dropdowndivstyle{
+    position: absolute; font-size: 12px; z-index: 999;     margin-top: 34px; border: 1px solid var(--ct-input-border-color); left: 24px; width: 200px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; display: none; background-color: rgb(255, 255, 255);
+    max-height: 250px;
+    overflow-y: auto;
+}
+.tabledropdowndivstyle{
+    position: absolute; font-size: 12px; z-index: 999; margin-top: 0px; border: 1px solid var(--ct-input-border-color);   width: 220px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; display: none; background-color: rgb(255, 255, 255);
+    max-height: 250px;
+    overflow-y: auto;
+}
+.productitemdetailsdivstyle{
+    position: absolute;
+    font-size: 12px;
+    z-index: 888;
+}

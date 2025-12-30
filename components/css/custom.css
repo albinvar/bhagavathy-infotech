@@ -1,0 +1,31 @@
+.listbtns {
+    padding: 6px 20px !important;
+    border-radius: 6px !important;
+}
+.formmainheading {
+    background: #161f52;
+    border-radius: 6px;
+    font-size: 17px;
+    color: #FFFFFF;
+    padding: 5px;
+    text-align: center;
+    text-transform: capitalize;
+    line-height: 22px;
+}
+.form-group{
+    margin-bottom: 20px;
+}
+.btn-primary{
+    background: #161f52;
+}
+
+.listpageprdimg {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50%;
+}
+.dashboardprdimg {
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 50%;
+}

@@ -1,0 +1,27 @@
+# Logs
+ci/application/logs/*
+!ci/application/logs/index.html
+
+# Cache
+ci/application/cache/*
+!ci/application/cache/index.html
+
+# Uploads (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Environment specific config
+ci/application/config/database.php
+
+# IDE and OS files
+.DS_Store
+.idea/
+*.swp
+*.swo
+.vscode/
+
+# Composer
+vendor/
+
+# Node modules (if any)
+node_modules/
