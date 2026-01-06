@@ -58,8 +58,13 @@
                                         ?>
                                     </select>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <button type="button" onclick="filterstockfun()" class="btn btn-blue" style="margin-top: 20px;">Filter</button>
+                                    <?php if($retaillist && count($retaillist) > 0): ?>
+                                    <button type="button" onclick="printAllBills()" class="btn btn-<?= ($customerid > 0) ? 'success' : 'secondary' ?>" style="margin-top: 20px; margin-left: 5px;">
+                                        <i class="fas fa-print"></i> Print All (<?= count($retaillist) ?>)
+                                    </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
@@ -70,6 +75,14 @@
                                     var todate = $('#todate').val();
                                     var customerid = $('#customerid').val();
                                     window.location.href= '<?= base_url() ?>sale/servicebillhistory/'+fromdate+'/'+todate+'/'+customerid;
+                                }
+
+                                function printAllBills()
+                                {
+                                    var fromdate = $('#fromdate').val();
+                                    var todate = $('#todate').val();
+                                    var customerid = $('#customerid').val();
+                                    window.open('<?= base_url() ?>sale/servicebillprintall/'+fromdate+'/'+todate+'/'+customerid, '_blank');
                                 }
                             </script>
 

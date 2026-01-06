@@ -2431,6 +2431,52 @@ class Sale extends MY_Controller {
         $this->load->view('ajaxserviceitemview', $this->data);
     }
 
+    public function servicebillprintall($fromdate=0, $todate=0, $customerid=0)
+    {
+        $this->load->model('sale/servicebillmaster_model', 'srvcbl');
+        $this->load->model('sale/servicebillslave_model', 'srvcblslv');
+        $this->load->model('business/customers_model', 'cstmr');
 
+        if($fromdate == 0)
+        {
+            $fromdate = date('Y-m-d', strtotime('-7 days'));
+            $todate = date('Y-m-d');
+        }else{
+            $fromdate = date('Y-m-d', strtotime($fromdate));
+            $todate = date('Y-m-d', strtotime($todate));
+        }
+
+        // Get customer details for matching old records
+        $customername = '';
+        $customerphone = '';
+        if($customerid > 0)
+        {
+            $customerdetails = $this->cstmr->getcustomerdetailsbyid($customerid);
+            if($customerdetails)
+            {
+                $customername = $customerdetails->ct_name;
+                $customerphone = $customerdetails->ct_phone;
+            }
+        }
+
+        $this->data['businessdet'] = $this->busunt->getbusinessunitdetailbyid($this->buid);
+        $this->data['billlist'] = $this->srvcbl->getretailbilllist($this->buid, $fromdate, $todate, $customerid, $customername, $customerphone);
+
+        // Fetch products for each bill
+        $billproducts = array();
+        if($this->data['billlist'])
+        {
+            foreach($this->data['billlist'] as $bill)
+            {
+                $billproducts[$bill->sb_servicebillid] = $this->srvcblslv->getbillproducts($bill->sb_servicebillid);
+            }
+        }
+        $this->data['billproducts'] = $billproducts;
+        $this->data['customername'] = $customername;
+        $this->data['fromdate'] = $fromdate;
+        $this->data['todate'] = $todate;
+
+        $this->load->view('servicebillprintall', $this->data, FALSE);
+    }
 
 }
