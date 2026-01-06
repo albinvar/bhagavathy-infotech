@@ -2405,7 +2405,21 @@ class Sale extends MY_Controller {
 
         $this->data['customerid'] = $customerid;
         $this->data['customerlist'] = $this->cstmr->getactivecustomers($this->buid);
-        $this->data['retaillist'] = $this->srvcbl->getretailbilllist($this->buid, $fromdate, $todate, $customerid);
+
+        // Get customer details for matching old records by name/phone
+        $customername = '';
+        $customerphone = '';
+        if($customerid > 0)
+        {
+            $customerdetails = $this->cstmr->getcustomerdetailsbyid($customerid);
+            if($customerdetails)
+            {
+                $customername = $customerdetails->ct_name;
+                $customerphone = $customerdetails->ct_phone;
+            }
+        }
+
+        $this->data['retaillist'] = $this->srvcbl->getretailbilllist($this->buid, $fromdate, $todate, $customerid, $customername, $customerphone);
         $this->load->template('servicebillhistory', $this->data, FALSE);
     }
 

@@ -23,7 +23,7 @@ class Servicebillmaster_model extends MY_Model {
         return FALSE;
     }
 
-    public function getretailbilllist($buid, $fromdate, $todate, $customerid = 0)
+    public function getretailbilllist($buid, $fromdate, $todate, $customerid = 0, $customername = '', $customerphone = '')
     {
     	$this->db->select($this->selectedfields);
         $this->db->from('ub_servicebillmaster');
@@ -33,7 +33,33 @@ class Servicebillmaster_model extends MY_Model {
         $this->db->where('sb_isactive', 0);
         if($customerid > 0)
         {
+            // Match by customer ID OR by name/phone for old records with sb_customerid = 0
+            $this->db->group_start();
             $this->db->where('sb_customerid', $customerid);
+            if($customername != '' || $customerphone != '')
+            {
+                $this->db->or_group_start();
+                $this->db->where('sb_customerid', 0);
+                $this->db->group_start();
+                if($customername != '')
+                {
+                    $this->db->like('sb_customername', $customername);
+                }
+                if($customerphone != '')
+                {
+                    if($customername != '')
+                    {
+                        $this->db->or_where('sb_phone', $customerphone);
+                    }
+                    else
+                    {
+                        $this->db->where('sb_phone', $customerphone);
+                    }
+                }
+                $this->db->group_end();
+                $this->db->group_end();
+            }
+            $this->db->group_end();
         }
         $this->db->order_by('sb_servicebillid', 'desc');
         $query = $this->db->get();
