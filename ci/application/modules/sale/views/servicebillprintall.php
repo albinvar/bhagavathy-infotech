@@ -24,12 +24,6 @@
 			margin: 0 auto;
 			border: 2px solid #8B0000;
 			padding: 0;
-			page-break-after: always;
-			page-break-inside: avoid;
-		}
-
-		.bill-container:last-child {
-			page-break-after: auto;
 		}
 
 		.header-section {
@@ -67,9 +61,9 @@
 		.cash-bill-label {
 			background-color: #D4A5A5;
 			color: #8B0000;
-			font-size: 18px;
+			font-size: 16px;
 			font-weight: bold;
-			padding: 8px 20px;
+			padding: 6px 15px;
 			text-align: center;
 			border: 1px solid #8B0000;
 			margin-top: 5px;
@@ -82,7 +76,7 @@
 		.customer-left {
 			padding: 10px 15px;
 			border-right: 1px solid #8B0000;
-			min-height: 80px;
+			min-height: 60px;
 		}
 
 		.customer-right {
@@ -93,13 +87,7 @@
 		.dotted-line {
 			border-bottom: 1px dotted #000;
 			display: inline-block;
-			min-width: 200px;
-		}
-
-		.bill-no {
-			font-size: 20px;
-			color: #8B0000;
-			font-weight: bold;
+			min-width: 150px;
 		}
 
 		.items-table {
@@ -109,39 +97,47 @@
 
 		.items-table th {
 			border: 1px solid #8B0000;
-			padding: 8px;
+			padding: 6px;
 			text-align: center;
 			font-weight: bold;
-			background-color: #fff;
+			background-color: #f5f5f5;
+			font-size: 11px;
 		}
 
 		.items-table td {
 			border: 1px solid #8B0000;
-			padding: 8px;
+			padding: 5px 8px;
 			vertical-align: top;
+			font-size: 11px;
 		}
 
 		.items-table .sno-col {
-			width: 50px;
+			width: 35px;
+			text-align: center;
+		}
+
+		.items-table .date-col {
+			width: 70px;
+			text-align: center;
+		}
+
+		.items-table .billno-col {
+			width: 45px;
 			text-align: center;
 		}
 
 		.items-table .particulars-col {
-			width: 55%;
-		}
-
-		.items-table .qty-col {
-			width: 60px;
-			text-align: center;
+			width: auto;
 		}
 
 		.items-table .amount-col {
-			width: 100px;
+			width: 80px;
 			text-align: right;
 		}
 
 		.total-row td {
 			font-weight: bold;
+			background-color: #f5f5f5;
 		}
 
 		.footer-section {
@@ -149,35 +145,15 @@
 		}
 
 		.rupees-section {
-			padding: 15px;
+			padding: 10px 15px;
 			border-right: 1px solid #8B0000;
-			min-height: 60px;
 		}
 
 		.signature-section {
-			padding: 15px;
+			padding: 10px 15px;
 			text-align: center;
 			font-weight: bold;
 			color: #8B0000;
-		}
-
-		.print-header {
-			text-align: center;
-			margin-bottom: 20px;
-			padding: 15px;
-			background: #f5f5f5;
-			border-radius: 5px;
-		}
-
-		.print-header h2 {
-			margin: 0 0 5px 0;
-			color: #333;
-		}
-
-		.print-header p {
-			margin: 0;
-			color: #666;
-			font-size: 14px;
 		}
 
 		.printButtonClass {
@@ -199,24 +175,8 @@
 			margin-bottom: 20px;
 		}
 
-		.summary-box {
-			background: #f8f9fa;
-			border: 1px solid #ddd;
-			padding: 15px;
-			margin-bottom: 20px;
-			border-radius: 5px;
-		}
-
-		.summary-box table {
-			width: 100%;
-		}
-
-		.summary-box td {
-			padding: 5px 10px;
-		}
-
 		@media print {
-			.no-print-controls, .print-header, .summary-box {
+			.no-print-controls {
 				display: none;
 			}
 			body {
@@ -230,28 +190,37 @@
 
 <div class="no-print-controls">
 	<a href="<?= base_url() ?>sale/servicebillhistory/<?= $fromdate ?>/<?= $todate ?>"><button class="printButtonClass back-btn">Back to List</button></a>
-	<button class="printButtonClass" onclick="window.print()">Print All Bills</button>
+	<button class="printButtonClass" onclick="window.print()">Print Consolidated Bill</button>
 </div>
 
-<?php if($billlist && count($billlist) > 0): ?>
+<?php if($billlist && count($billlist) > 0):
+	// Calculate totals
+	$grandTotal = 0;
+	$totalFreight = 0;
+	$totalItems = 0;
+	$allItems = array();
 
-<div class="print-header">
-	<h2>Service Bills<?= $customername ? ' - ' . $customername : '' ?></h2>
-	<p>Period: <?= date('d/m/Y', strtotime($fromdate)) ?> to <?= date('d/m/Y', strtotime($todate)) ?> | Total Bills: <?= count($billlist) ?></p>
-</div>
+	// Collect all items with their bill info
+	foreach($billlist as $bill) {
+		$grandTotal += $bill->sb_grandtotal;
+		$totalFreight += $bill->sb_freight;
 
-<div class="summary-box">
-	<table>
-		<tr>
-			<td><strong>Total Bills:</strong> <?= count($billlist) ?></td>
-			<td><strong>Total Amount:</strong> <?= number_format(array_sum(array_column($billlist, 'sb_grandtotal')), 2) ?></td>
-			<td><strong>Total Freight:</strong> <?= number_format(array_sum(array_column($billlist, 'sb_freight')), 2) ?></td>
-		</tr>
-	</table>
-</div>
+		if(isset($billproducts[$bill->sb_servicebillid]) && $billproducts[$bill->sb_servicebillid]) {
+			foreach($billproducts[$bill->sb_servicebillid] as $item) {
+				$allItems[] = array(
+					'date' => $bill->sb_date,
+					'billno' => $bill->sb_billno,
+					'productname' => $item->sbs_productname,
+					'complaint' => $item->sbs_complaint,
+					'price' => $item->sbs_price
+				);
+				$totalItems++;
+			}
+		}
+	}
 
-<?php foreach($billlist as $billedet):
-	$billprodcts = isset($billproducts[$billedet->sb_servicebillid]) ? $billproducts[$billedet->sb_servicebillid] : array();
+	// Get first bill's customer info (they should be same when filtered by customer)
+	$firstBill = $billlist[0];
 ?>
 
 <div class="bill-container">
@@ -270,32 +239,37 @@
 					<br/><?= $businessdet[0]->bu_mobile ?>
 					<?php } ?>
 				</div>
-				<div class="cash-bill-label">CASH BILL</div>
+				<div class="cash-bill-label">CONSOLIDATED STATEMENT</div>
 			</td>
 		</tr>
 	</table>
 
-	<!-- Customer & Bill Details Section -->
+	<!-- Customer & Period Details Section -->
 	<table width="100%" cellpadding="0" cellspacing="0" class="customer-section">
 		<tr>
-			<td width="65%" class="customer-left" valign="top">
-				<div style="margin-bottom: 10px;"><strong>To</strong></div>
-				<div style="margin-bottom: 8px;">
-					M/s. <span class="dotted-line"><?= $billedet->sb_customername ?></span>
+			<td width="60%" class="customer-left" valign="top">
+				<div style="margin-bottom: 8px;"><strong>To</strong></div>
+				<div style="margin-bottom: 6px;">
+					M/s. <span class="dotted-line"><?= $customername ? $customername : $firstBill->sb_customername ?></span>
 				</div>
-				<div style="margin-bottom: 8px;">
-					<span class="dotted-line"><?= $billedet->sb_place ?></span>
+				<?php if($firstBill->sb_place): ?>
+				<div style="margin-bottom: 6px;">
+					<span class="dotted-line"><?= $firstBill->sb_place ?></span>
 				</div>
+				<?php endif; ?>
 				<div>
-					<span class="dotted-line">Ph: <?= $billedet->sb_phone ?></span>
+					Ph: <span class="dotted-line"><?= $firstBill->sb_phone ?></span>
 				</div>
 			</td>
-			<td width="35%" class="customer-right" valign="top">
-				<div style="margin-bottom: 15px;">
-					<strong>No.</strong> <span class="bill-no"><?= $billedet->sb_billno ?></span>
+			<td width="40%" class="customer-right" valign="top">
+				<div style="margin-bottom: 8px;">
+					<strong>Period:</strong> <?= date('d/m/Y', strtotime($fromdate)) ?> - <?= date('d/m/Y', strtotime($todate)) ?>
+				</div>
+				<div style="margin-bottom: 8px;">
+					<strong>Total Bills:</strong> <?= count($billlist) ?>
 				</div>
 				<div>
-					<strong>Date :</strong> <?= date('d/m/Y', strtotime($billedet->sb_date)) ?>
+					<strong>Print Date:</strong> <?= date('d/m/Y') ?>
 				</div>
 			</td>
 		</tr>
@@ -306,55 +280,49 @@
 		<thead>
 			<tr>
 				<th class="sno-col">S.No</th>
+				<th class="date-col">Date</th>
+				<th class="billno-col">Bill#</th>
 				<th class="particulars-col">Particulars</th>
-				<th class="qty-col">Qty.</th>
 				<th class="amount-col">Amount</th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php
 			$kn = 1;
-			$minRows = 10;
-			$itemCount = 0;
-
-			if (!empty($billprodcts)) {
-				foreach ($billprodcts as $prvl) {
-					$itemCount++;
-					?>
-					<tr>
-						<td class="sno-col"><?= $kn ?></td>
-						<td class="particulars-col">
-							<?= $prvl->sbs_productname ?>
-							<?php if(!empty($prvl->sbs_complaint)) { ?>
-							<br/><small>(<?= $prvl->sbs_complaint ?>)</small>
-							<?php } ?>
-						</td>
-						<td class="qty-col">1</td>
-						<td class="amount-col"><?= number_format($prvl->sbs_price, 2) ?></td>
-					</tr>
-					<?php
-					$kn++;
-				}
-			}
-
-			// Add empty rows to maintain bill height
-			for ($i = $itemCount; $i < $minRows; $i++) {
+			foreach ($allItems as $item) {
 				?>
 				<tr>
-					<td class="sno-col">&nbsp;</td>
-					<td class="particulars-col">&nbsp;</td>
-					<td class="qty-col">&nbsp;</td>
-					<td class="amount-col">&nbsp;</td>
+					<td class="sno-col"><?= $kn ?></td>
+					<td class="date-col"><?= date('d/m/y', strtotime($item['date'])) ?></td>
+					<td class="billno-col"><?= $item['billno'] ?></td>
+					<td class="particulars-col">
+						<?= $item['productname'] ?>
+						<?php if(!empty($item['complaint'])) { ?>
+						<br/><small style="color: #666;">(<?= $item['complaint'] ?>)</small>
+						<?php } ?>
+					</td>
+					<td class="amount-col"><?= number_format($item['price'], 2) ?></td>
 				</tr>
 				<?php
+				$kn++;
 			}
+
+			// Add freight row if there's freight
+			if($totalFreight > 0) {
 			?>
+			<tr>
+				<td class="sno-col"></td>
+				<td class="date-col"></td>
+				<td class="billno-col"></td>
+				<td class="particulars-col"><em>Freight Charges</em></td>
+				<td class="amount-col"><?= number_format($totalFreight, 2) ?></td>
+			</tr>
+			<?php } ?>
 
 			<!-- Total Row -->
 			<tr class="total-row">
-				<td colspan="2" style="text-align: right; padding-right: 20px;"><strong>TOTAL</strong></td>
-				<td class="qty-col"><strong><?= $itemCount ?></strong></td>
-				<td class="amount-col"><strong><?= number_format($billedet->sb_grandtotal, 2) ?></strong></td>
+				<td colspan="4" style="text-align: right; padding-right: 15px;"><strong>GRAND TOTAL</strong></td>
+				<td class="amount-col"><strong><?= number_format($grandTotal, 2) ?></strong></td>
 			</tr>
 		</tbody>
 	</table>
@@ -363,19 +331,16 @@
 	<table width="100%" cellpadding="0" cellspacing="0" class="footer-section">
 		<tr>
 			<td width="60%" class="rupees-section" valign="top">
-				<div style="margin-bottom: 10px;">
-					<strong>Rupees:</strong> <?= convert_numbertowords($billedet->sb_grandtotal) ?> Only
+				<div>
+					<strong>Rupees:</strong> <?= convert_numbertowords($grandTotal) ?> Only
 				</div>
-				<div class="dotted-line" style="width: 90%;"></div>
 			</td>
 			<td width="40%" class="signature-section" valign="bottom">
-				<div style="margin-top: 30px;">For <?= $businessdet[0]->bu_unitname ?></div>
+				<div style="margin-top: 20px;">For <?= $businessdet[0]->bu_unitname ?></div>
 			</td>
 		</tr>
 	</table>
 </div>
-
-<?php endforeach; ?>
 
 <?php else: ?>
 <div style="text-align: center; padding: 50px;">
@@ -383,11 +348,6 @@
 	<a href="<?= base_url() ?>sale/servicebillhistory"><button class="printButtonClass back-btn">Back to List</button></a>
 </div>
 <?php endif; ?>
-
-<script>
-	// Auto-print when page loads (optional - remove if you want manual print)
-	// window.onload = function() { window.print(); }
-</script>
 
 </body>
 </html>
