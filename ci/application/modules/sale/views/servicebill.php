@@ -48,41 +48,69 @@
                             </div>
 
                             <div class="row mt-3">
-                                
+
+                                <div class="col-md-3">
+                                    <label>Customer Type</label>
+                                    <select class="w-100 inputfieldcss" name="existcustomer" id="existcustomer" onchange="toggleCustomerType()">
+                                        <option value="0">Walk-in Customer</option>
+                                        <option value="1">Existing Customer</option>
+                                    </select>
+                                    <input type="hidden" name="customerid" id="customerid" value="0">
+                                </div>
+
+                                <div id="existingcustdiv" style="display: none;">
+                                    <div class="row mt-2">
+                                        <div class="col-md-12">
+                                            <label>Select Customer</label>
+                                            <select class="w-100 inputfieldcss" name="selectedcustomer" id="selectedcustomer" onchange="fillCustomerDetails()">
+                                                <option value="">-- Select Customer --</option>
+                                                <?php if($customerlist): foreach($customerlist as $cst): ?>
+                                                <option value="<?= $cst->ct_cstomerid ?>"
+                                                    data-name="<?= htmlspecialchars($cst->ct_name) ?>"
+                                                    data-phone="<?= htmlspecialchars($cst->ct_phone) ?>"
+                                                    data-address="<?= htmlspecialchars($cst->ct_address) ?>"
+                                                    data-gstin="<?= htmlspecialchars($cst->ct_gstnumber ?? '') ?>">
+                                                    <?= $cst->ct_name ?> - <?= $cst->ct_phone ?>
+                                                </option>
+                                                <?php endforeach; endif; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div id="walkincustdiv">
                                 <div class="row mt-2">
                                     <div class="col-md-3">
                                         <label>Customer Name</label>
-                                        <input type="text" name="customername" placeholder="Customer Name" class="w-100 inputfieldcss">
+                                        <input type="text" name="customername" id="customername" placeholder="Customer Name" class="w-100 inputfieldcss">
                                     </div>
 
                                     <div class="col-md-3">
                                         <label>Customer Phone</label>
-                                        <input type="text" name="customerphone" placeholder="Customer Phone" class="w-100 inputfieldcss">
+                                        <input type="text" name="customerphone" id="customerphone" placeholder="Customer Phone" class="w-100 inputfieldcss">
                                     </div>
 
                                     <div class="col-md-3">
                                         <label>Customer Address</label>
-                                        <input type="text" name="customeraddress" placeholder="Customer Address" class="w-100 inputfieldcss">
+                                        <input type="text" name="customeraddress" id="customeraddress" placeholder="Customer Address" class="w-100 inputfieldcss">
                                     </div>
 
                                     <div class="col-md-3">
                                         <label>GSTIN</label>
-                                        <input type="text" name="customergstin" placeholder="Customer GSTIN" class="w-100 inputfieldcss">
+                                        <input type="text" name="customergstin" id="customergstin" placeholder="Customer GSTIN" class="w-100 inputfieldcss">
                                     </div>
-                                         
-                                </div>    
-                                </div>
-                                
 
-                                
+                                </div>
+                                </div>
+
+
+
                                 <div class="col-md-3 mt-2">
                                     <label>Date</label>
                                     <input type="date" name="billdate" class="w-100 inputfieldcss">
                                 </div>
-                                
-                                
+
+
 
                             </div>
 
@@ -197,7 +225,50 @@
 
     
     <script type="text/javascript">
-    
+
+    function toggleCustomerType()
+    {
+        var existcustomer = $('#existcustomer').val();
+        if(existcustomer == '1')
+        {
+            $('#existingcustdiv').show();
+            $('#walkincustdiv').find('input').prop('readonly', true);
+        }
+        else
+        {
+            $('#existingcustdiv').hide();
+            $('#walkincustdiv').find('input').prop('readonly', false);
+            $('#customerid').val(0);
+            $('#customername').val('');
+            $('#customerphone').val('');
+            $('#customeraddress').val('');
+            $('#customergstin').val('');
+            $('#selectedcustomer').val('');
+        }
+    }
+
+    function fillCustomerDetails()
+    {
+        var selected = $('#selectedcustomer option:selected');
+        var custid = selected.val();
+
+        if(custid != '')
+        {
+            $('#customerid').val(custid);
+            $('#customername').val(selected.data('name'));
+            $('#customerphone').val(selected.data('phone'));
+            $('#customeraddress').val(selected.data('address'));
+            $('#customergstin').val(selected.data('gstin'));
+        }
+        else
+        {
+            $('#customerid').val(0);
+            $('#customername').val('');
+            $('#customerphone').val('');
+            $('#customeraddress').val('');
+            $('#customergstin').val('');
+        }
+    }
 
     function tofixed_amount(amnt)
     {

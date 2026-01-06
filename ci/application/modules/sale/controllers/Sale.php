@@ -2287,10 +2287,12 @@ class Sale extends MY_Controller {
     {
         $this->load->model('Country_model', 'cuntry');
         $this->load->model('sale/servicebillmaster_model', 'srvcbl');
-        
+        $this->load->model('business/customers_model', 'cstmr');
+
         $this->data['title'] = "Service Billing";
-       
+
         $this->data['states'] = $this->cuntry->getstatelist('101');
+        $this->data['customerlist'] = $this->cstmr->getactivecustomers($this->buid);
 
         $this->data['billno'] = $this->srvcbl->getnextservicebillno($this->buid);
 
@@ -2300,10 +2302,12 @@ class Sale extends MY_Controller {
     {
         $this->load->model('sale/servicebillmaster_model', 'srvcbl');
         $this->load->model('sale/servicebillslave_model', 'srvcblslv');
-        
+
         $billno = $this->input->post('billno');
         $saledate = date('Y-m-d', strtotime($this->input->post('saledate')));
         $saletime = date('H:i:s', strtotime($this->input->post('saletime')));
+        $existcustomer = $this->input->post('existcustomer');
+        $customerid = $this->input->post('customerid');
         $customername = $this->input->post('customername');
         $customerphone = $this->input->post('customerphone');
         $customeraddress = $this->input->post('customeraddress');
@@ -2326,7 +2330,8 @@ class Sale extends MY_Controller {
             'sb_billno'     => $billno,
             'sb_date'       => $saledate,
             'sb_time'       => $saletime,
-            'sb_customerid' => 0,
+            'sb_existcustomer' => $existcustomer,
+            'sb_customerid' => $customerid ? $customerid : 0,
             'sb_customername' => $customername,
             'sb_phone'      => $customerphone,
             'sb_place'      => $customeraddress,

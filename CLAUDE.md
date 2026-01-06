@@ -6,6 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **Fire Safety Compliance Module** built on CodeIgniter 3.x with HMVC (Hierarchical Model-View-Controller) architecture. It's a multi-tenant business application supporting inventory, sales, purchases, production, CRM, POS, and accounting modules.
 
+## Development Commands
+
+```bash
+# Install PHP dependencies
+composer install
+
+# Database setup - import the main schema
+mysql -u [user] -p [database] < db/clacton.sql
+
+# Run local development server (PHP built-in)
+php -S localhost:8000
+
+# Run tests (PHPUnit 4.x/5.x)
+vendor/bin/phpunit
+```
+
 ## Architecture
 
 ### Directory Structure
@@ -39,7 +55,7 @@ modules/
 - `MY_Controller.php` - Base controller with authentication, session handling, business unit context, financial year management, and permission checks
 - `MY_Model.php` - Extended model with CRUD operations, soft deletes, validation, callbacks, and relationships
 - `MY_Router.php` - Custom routing for HMVC
-- `MY_Loader.php` - Extended loader for modules
+- `MY_Loader.php` - Extended loader for modules with template methods (`template()`, `admintemplate()`, `signintemplate()`, `postemplate()`)
 
 ### Key Libraries (ci/application/libraries/)
 - `REST_Controller.php` - RESTful API support
@@ -59,6 +75,11 @@ modules/
 Controllers extend `MY_Controller` and use render methods:
 ```php
 class Example extends MY_Controller {
+    public function __construct() {
+        parent::__construct();
+        $this->load->model('module/model_name', 'alias');
+    }
+
     public function index() {
         $data['content'] = $this->load->view('example/index', $data, true);
         $this->dashboardrender($data['content']);  // Full dashboard layout
@@ -68,11 +89,17 @@ class Example extends MY_Controller {
 ```
 
 ### Model Pattern
-Models extend `MY_Model` with automatic table detection:
+Models extend `MY_Model` with automatic table detection and ORM features:
 ```php
 class Product_model extends MY_Model {
-    protected $_table = 'products';
+    protected $_table = 'ub_products';
     protected $primary_key = 'product_id';
+    protected $soft_delete = FALSE;  // Enable logical deletes if needed
+
+    // Callbacks available: before_create, after_create, before_update,
+    // after_update, before_get, after_get, before_delete, after_delete
+
+    // Relationships: belongs_to, has_many (use with() for eager loading)
 }
 ```
 
@@ -84,19 +111,46 @@ Key session data available in controllers via `MY_Controller`:
 - `$this->finyearid` - Current financial year ID
 - `$this->userrole` - User role (1=admin, 2=business owner)
 - `$this->permissionmodulearrayspages` - Module permissions array
+- `$this->currency`, `$this->currencysymbol`, `$this->decimalpoints` - Localization
+- `$this->isvatgst` - Tax type (0=GST, 1=VAT)
+- `$this->godownid` - Current warehouse/godown ID
+
+### Checksum Security
+Controllers use checksum validation for secure operations:
+```php
+// Generate checksum
+$checksum = $this->checksumgen($id);  // Uses SHA1(HASHCODE + value)
+
+// Validate checksum
+if ($this->validchecksumcheck($id, $hash)) {
+    // Valid request
+}
+```
 
 ### Database
 - MySQL with mysqli driver
 - Query Builder enabled
 - Character set: UTF-8
+- Table prefix: `ub_` (e.g., `ub_products`, `ub_customers`)
 
 ## Code Style
 - Allman indent style (braces on new line)
 - Tabs for indentation
 - LF line endings
-- PHP 5.3.7+ compatible
+- UTF-8 character set
+- PHP 5.3.7+ compatible (avoid modern PHP 7+ features)
+
+## Configuration Files
+- `ci/application/config/database.php` - Database connection
+- `ci/application/config/routes.php` - URL routing and API routes
+- `ci/application/config/autoload.php` - Auto-loaded libraries and helpers
+
+### Auto-loaded Resources
+Libraries: database, session, view, template, password, email
+Helpers: url, form, file, html, application, my_form_helper, string, excel, security, commonfunction, my_array_helper, my_common_helper, my_date_helper
 
 ## API Endpoints
 REST API controllers in `ci/application/controllers/api/`:
 - Uses `REST_Controller` library
 - Routes configured in `ci/application/config/routes.php`
+- Supports multiple response formats (JSON, XML)
