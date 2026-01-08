@@ -88,6 +88,12 @@ class Example extends MY_Controller {
 }
 ```
 
+### View Rendering Methods
+- `$this->dashboardrender($content)` - Full page with sidebar and header
+- `$this->framerender($content)` - Partial/iframe layout without navigation
+- `$this->load->template('viewname', $data)` - HMVC module template loader
+- `$this->render($content)` - Sign-in/basic layout
+
 ### Model Pattern
 Models extend `MY_Model` with automatic table detection and ORM features:
 ```php
@@ -138,7 +144,12 @@ if ($this->validchecksumcheck($id, $hash)) {
 - Tabs for indentation
 - LF line endings
 - UTF-8 character set
-- PHP 5.3.7+ compatible (avoid modern PHP 7+ features)
+- **PHP 5.3.7+ compatible** - Do NOT use:
+  - Null coalescing operator (`??`)
+  - Null safe operator (`?->`)
+  - Short array syntax in older files (`[]` vs `array()`)
+  - Arrow functions (`fn() =>`)
+  - Typed properties or return types
 
 ## Configuration Files
 - `ci/application/config/database.php` - Database connection
@@ -148,6 +159,18 @@ if ($this->validchecksumcheck($id, $hash)) {
 ### Auto-loaded Resources
 Libraries: database, session, view, template, password, email
 Helpers: url, form, file, html, application, my_form_helper, string, excel, security, commonfunction, my_array_helper, my_common_helper, my_date_helper
+
+### Application Constants (ci/application/config/constants.php)
+- `HASHCODE` - Used for checksum generation (SHA1-based security)
+- `FOLDERPATH` - Upload directory path ('uploads')
+- `QUERYLIMIT` - Default pagination limit
+- `PAGINATIONPERPAGECOUNT` - Items per page for pagination
+
+### Custom Helper Functions
+Common date functions in `my_date_helper.php`:
+- `current_date_mysqlformat()` - Returns current date as 'Y-m-d'
+- `get_date($date)` - Formats date as 'd-M-Y'
+- `get_updated_on()` - Returns current datetime for update timestamps
 
 ## API Endpoints
 REST API controllers in `ci/application/controllers/api/`:

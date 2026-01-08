@@ -69,7 +69,7 @@
                                                     data-name="<?= htmlspecialchars($cst->ct_name) ?>"
                                                     data-phone="<?= htmlspecialchars($cst->ct_phone) ?>"
                                                     data-address="<?= htmlspecialchars($cst->ct_address) ?>"
-                                                    data-gstin="<?= htmlspecialchars($cst->ct_gstnumber ?? '') ?>">
+                                                    data-gstin="<?= htmlspecialchars(isset($cst->ct_gstnumber) ? $cst->ct_gstnumber : '') ?>">
                                                     <?= $cst->ct_name ?> - <?= $cst->ct_phone ?>
                                                 </option>
                                                 <?php endforeach; endif; ?>
