@@ -2592,7 +2592,7 @@ class Sale extends MY_Controller {
     /**
      * Service Register - History/List View
      */
-    public function serviceregisterhistory($status = 'all', $fromdate = 0, $todate = 0)
+    public function serviceregisterhistory($status = 'all', $fromdate = 0, $todate = 0, $customerid = 0)
     {
         $this->load->model('sale/Serviceregister_model', 'srvreg');
         $this->load->model('business/customers_model', 'cstmr');
@@ -2610,9 +2610,10 @@ class Sale extends MY_Controller {
         $this->data['fromdate'] = $fromdate;
         $this->data['todate'] = $todate;
         $this->data['status'] = $status;
+        $this->data['customerid'] = $customerid;
         $this->data['customerlist'] = $this->cstmr->getactivecustomers($this->buid);
 
-        $this->data['registerlist'] = $this->srvreg->getserviceregisterlist($this->buid, $fromdate, $todate, $status);
+        $this->data['registerlist'] = $this->srvreg->getserviceregisterlist($this->buid, $fromdate, $todate, $status, $customerid);
 
         // Get counts for status badges
         $this->data['pendingcount'] = $this->srvreg->getcountbystatus($this->buid, 0);
@@ -2840,9 +2841,10 @@ class Sale extends MY_Controller {
     /**
      * Service Register - Print Register Report for Date Range
      */
-    public function serviceregisterreport($status = 'all', $fromdate = 0, $todate = 0)
+    public function serviceregisterreport($status = 'all', $fromdate = 0, $todate = 0, $customerid = 0)
     {
         $this->load->model('sale/Serviceregister_model', 'srvreg');
+        $this->load->model('business/customers_model', 'cstmr');
 
         if ($fromdate == 0) {
             $fromdate = date('Y-m-d', strtotime('-30 days'));
@@ -2855,8 +2857,17 @@ class Sale extends MY_Controller {
         $this->data['fromdate'] = $fromdate;
         $this->data['todate'] = $todate;
         $this->data['status'] = $status;
-        $this->data['registerlist'] = $this->srvreg->getserviceregisterlist($this->buid, $fromdate, $todate, $status);
+        $this->data['customerid'] = $customerid;
+        $this->data['registerlist'] = $this->srvreg->getserviceregisterlist($this->buid, $fromdate, $todate, $status, $customerid);
         $this->data['businessdet'] = $this->busunt->getbusinessunitdetailbyid($this->buid);
+
+        // Get customer name if filtered
+        if ($customerid > 0) {
+            $customerdet = $this->cstmr->getcustomerdetailsbyid($customerid);
+            $this->data['filteredcustomer'] = $customerdet ? $customerdet->ct_name : '';
+        } else {
+            $this->data['filteredcustomer'] = '';
+        }
 
         $this->load->view('serviceregisterreport', $this->data, FALSE);
     }

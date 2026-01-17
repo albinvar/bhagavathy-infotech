@@ -114,6 +114,15 @@
                                         <option value="3" <?= ($status === '3' || $status === 3) ? 'selected' : '' ?>>Delivered</option>
                                     </select>
                                 </div>
+                                <div class="col-md-2">
+                                    <label>Customer</label>
+                                    <select class="form-control" name="customerfilter" id="customerfilter">
+                                        <option value="0">All Customers</option>
+                                        <?php if($customerlist): foreach($customerlist as $cst): ?>
+                                        <option value="<?= $cst->ct_cstomerid ?>" <?= ($customerid == $cst->ct_cstomerid) ? 'selected' : '' ?>><?= $cst->ct_name ?></option>
+                                        <?php endforeach; endif; ?>
+                                    </select>
+                                </div>
                                 <div class="col-md-1">
                                     <label>&nbsp;</label>
                                     <button type="button" onclick="applyFilter()" class="btn btn-primary form-control"><i class="fas fa-filter"></i></button>
@@ -124,7 +133,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label>&nbsp;</label>
-                                    <button type="button" onclick="printRegister()" class="btn btn-info form-control"><i class="fas fa-print"></i> Print Register</button>
+                                    <button type="button" onclick="printRegister()" class="btn btn-info form-control"><i class="fas fa-print"></i> Print</button>
                                 </div>
                             </div>
 
@@ -255,7 +264,8 @@ function applyFilter() {
     var fromdate = $('#fromdate').val();
     var todate = $('#todate').val();
     var status = $('#statusfilter').val();
-    window.location.href = '<?= base_url() ?>sale/serviceregisterhistory/' + status + '/' + fromdate + '/' + todate;
+    var customerid = $('#customerfilter').val();
+    window.location.href = '<?= base_url() ?>sale/serviceregisterhistory/' + status + '/' + fromdate + '/' + todate + '/' + customerid;
 }
 
 function resetFilter() {
@@ -265,7 +275,8 @@ function resetFilter() {
 function filterByStatus(status) {
     var fromdate = $('#fromdate').val();
     var todate = $('#todate').val();
-    window.location.href = '<?= base_url() ?>sale/serviceregisterhistory/' + status + '/' + fromdate + '/' + todate;
+    var customerid = $('#customerfilter').val();
+    window.location.href = '<?= base_url() ?>sale/serviceregisterhistory/' + status + '/' + fromdate + '/' + todate + '/' + customerid;
 }
 
 function updateStatus(id, status) {
@@ -293,6 +304,7 @@ function printRegister() {
     var fromdate = $('#fromdate').val();
     var todate = $('#todate').val();
     var status = $('#statusfilter').val();
-    window.open('<?= base_url() ?>sale/serviceregisterreport/' + status + '/' + fromdate + '/' + todate, '_blank');
+    var customerid = $('#customerfilter').val();
+    window.open('<?= base_url() ?>sale/serviceregisterreport/' + status + '/' + fromdate + '/' + todate + '/' + customerid, '_blank');
 }
 </script>

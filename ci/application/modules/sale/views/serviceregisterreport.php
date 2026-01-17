@@ -166,6 +166,9 @@
         elseif($status === '3' || $status === 3) $statusLabel = 'Delivered';
         ?>
         | Status: <?= $statusLabel ?>
+        <?php if(!empty($filteredcustomer)): ?>
+        | Customer: <?= htmlspecialchars($filteredcustomer) ?>
+        <?php endif; ?>
     </p>
 </div>
 
