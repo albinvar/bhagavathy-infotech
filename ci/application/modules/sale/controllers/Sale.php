@@ -2506,6 +2506,7 @@ class Sale extends MY_Controller {
     public function addserviceregister()
     {
         $this->load->model('sale/Serviceregister_model', 'srvreg');
+        $this->load->model('business/customers_model', 'cstmr');
 
         $servicecode = $this->input->post('servicecode');
         $existcustomer = $this->input->post('existcustomer');
@@ -2515,10 +2516,46 @@ class Sale extends MY_Controller {
         $customeraddress = $this->input->post('customeraddress');
         $printername = $this->input->post('printername');
         $printertype = $this->input->post('printertype');
+        $printertypeother = $this->input->post('printertypeother');
         $serialno = $this->input->post('serialno');
         $reason = $this->input->post('reason');
         $indate = $this->input->post('indate');
         $intime = $this->input->post('intime');
+
+        // Handle "Other" type
+        if ($printertype == 'Other' && !empty($printertypeother)) {
+            $printertype = $printertypeother;
+        }
+
+        // For walk-in customers, save to customers table
+        $finalCustomerId = 0;
+        if ($existcustomer == 0 && !empty($customername) && !empty($customerphone)) {
+            // Check if customer already exists by phone
+            $existingCustomer = $this->cstmr->get_by(array(
+                'ct_buid' => $this->buid,
+                'ct_phone' => $customerphone,
+                'ct_isactive' => 0
+            ));
+
+            if ($existingCustomer) {
+                $finalCustomerId = $existingCustomer->ct_cstomerid;
+            } else {
+                // Create new customer
+                $finalCustomerId = $this->cstmr->insert(array(
+                    'ct_buid'         => $this->buid,
+                    'ct_name'         => $customername,
+                    'ct_address'      => $customeraddress,
+                    'ct_phone'        => $customerphone,
+                    'ct_type'         => 0,
+                    'ct_balanceamount'=> 0,
+                    'ct_updatedon'    => $this->updatedon,
+                    'ct_updatedby'    => $this->loggeduserid,
+                    'ct_isactive'     => 0
+                ), TRUE);
+            }
+        } else {
+            $finalCustomerId = $customerid;
+        }
 
         $insertdata = array(
             'sr_buid'         => $this->buid,
@@ -2526,8 +2563,8 @@ class Sale extends MY_Controller {
             'sr_code'         => $servicecode,
             'sr_indate'       => $indate,
             'sr_intime'       => $intime,
-            'sr_existcustomer'=> $existcustomer,
-            'sr_customerid'   => ($existcustomer == 1) ? $customerid : 0,
+            'sr_existcustomer'=> ($finalCustomerId > 0) ? 1 : 0,
+            'sr_customerid'   => $finalCustomerId,
             'sr_customername' => $customername,
             'sr_phone'        => $customerphone,
             'sr_address'      => $customeraddress,
@@ -2712,6 +2749,13 @@ class Sale extends MY_Controller {
 
         $existcustomer = $this->input->post('existcustomer');
         $customerid = $this->input->post('customerid');
+        $printertype = $this->input->post('printertype');
+        $printertypeother = $this->input->post('printertypeother');
+
+        // Handle "Other" type
+        if ($printertype == 'Other' && !empty($printertypeother)) {
+            $printertype = $printertypeother;
+        }
 
         $updatedata = array(
             'sr_existcustomer'=> $existcustomer,
@@ -2720,7 +2764,7 @@ class Sale extends MY_Controller {
             'sr_phone'        => $this->input->post('customerphone'),
             'sr_address'      => $this->input->post('customeraddress'),
             'sr_printername'  => $this->input->post('printername'),
-            'sr_printertype'  => $this->input->post('printertype'),
+            'sr_printertype'  => $printertype,
             'sr_serialno'     => $this->input->post('serialno'),
             'sr_reason'       => $this->input->post('reason'),
             'sr_status'       => $this->input->post('status'),

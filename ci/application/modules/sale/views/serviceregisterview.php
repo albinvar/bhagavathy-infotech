@@ -142,7 +142,18 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label>Type</label>
-                                    <input type="text" name="printertype" id="printertype" value="<?= htmlspecialchars($entry->sr_printertype) ?>" class="w-100 inputfieldcss form-control" <?= ($entry->sr_status == 3) ? 'readonly' : '' ?>>
+                                    <?php
+                                    $typeOptions = array('Laser Printer', 'Inkjet Printer', 'Dot Matrix Printer', 'Thermal Printer', 'Multifunction Printer', 'Plotter', 'Scanner', 'Copier', 'UPS', 'Computer', 'Laptop', 'Monitor');
+                                    $isOther = !empty($entry->sr_printertype) && !in_array($entry->sr_printertype, $typeOptions);
+                                    ?>
+                                    <select name="printertype" id="printertype" class="w-100 inputfieldcss form-control" onchange="toggleOtherType()" <?= ($entry->sr_status == 3) ? 'disabled' : '' ?>>
+                                        <option value="">-- Select Type --</option>
+                                        <?php foreach($typeOptions as $opt): ?>
+                                        <option value="<?= $opt ?>" <?= ($entry->sr_printertype == $opt) ? 'selected' : '' ?>><?= $opt ?></option>
+                                        <?php endforeach; ?>
+                                        <option value="Other" <?= $isOther ? 'selected' : '' ?>>Other</option>
+                                    </select>
+                                    <input type="text" name="printertypeother" id="printertypeother" value="<?= $isOther ? htmlspecialchars($entry->sr_printertype) : '' ?>" placeholder="Enter device type" class="w-100 inputfieldcss form-control mt-2" style="<?= $isOther ? '' : 'display: none;' ?>" <?= ($entry->sr_status == 3) ? 'readonly' : '' ?>>
                                 </div>
                                 <div class="col-md-4">
                                     <label>Serial Number</label>
@@ -245,6 +256,15 @@ function fillCustomerDetails() {
         $('#customername').val(selected.data('name'));
         $('#customerphone').val(selected.data('phone'));
         $('#customeraddress').val(selected.data('address'));
+    }
+}
+
+function toggleOtherType() {
+    var printertype = $('#printertype').val();
+    if(printertype == 'Other') {
+        $('#printertypeother').show().focus();
+    } else {
+        $('#printertypeother').hide().val('');
     }
 }
 </script>

@@ -103,7 +103,23 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label>Type</label>
-                                    <input type="text" name="printertype" id="printertype" placeholder="e.g., Laser Printer, Scanner, UPS" class="w-100 inputfieldcss form-control">
+                                    <select name="printertype" id="printertype" class="w-100 inputfieldcss form-control" onchange="toggleOtherType()">
+                                        <option value="">-- Select Type --</option>
+                                        <option value="Laser Printer">Laser Printer</option>
+                                        <option value="Inkjet Printer">Inkjet Printer</option>
+                                        <option value="Dot Matrix Printer">Dot Matrix Printer</option>
+                                        <option value="Thermal Printer">Thermal Printer</option>
+                                        <option value="Multifunction Printer">Multifunction Printer</option>
+                                        <option value="Plotter">Plotter</option>
+                                        <option value="Scanner">Scanner</option>
+                                        <option value="Copier">Copier</option>
+                                        <option value="UPS">UPS</option>
+                                        <option value="Computer">Computer</option>
+                                        <option value="Laptop">Laptop</option>
+                                        <option value="Monitor">Monitor</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <input type="text" name="printertypeother" id="printertypeother" placeholder="Enter device type" class="w-100 inputfieldcss form-control mt-2" style="display: none;">
                                 </div>
                                 <div class="col-md-4">
                                     <label>Serial Number</label>
@@ -171,6 +187,15 @@ function fillCustomerDetails() {
         $('#customername').val('');
         $('#customerphone').val('');
         $('#customeraddress').val('');
+    }
+}
+
+function toggleOtherType() {
+    var printertype = $('#printertype').val();
+    if(printertype == 'Other') {
+        $('#printertypeother').show().focus();
+    } else {
+        $('#printertypeother').hide().val('');
     }
 }
 
