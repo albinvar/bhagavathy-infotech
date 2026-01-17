@@ -166,8 +166,26 @@
                                     </ul>
                                 </div>
                             </li>
-                            
-                            
+
+                            <li>
+                                <a href="#sidebarserviceregister" data-bs-toggle="collapse">
+                                    <i data-feather="clipboard"></i>
+                                    <span> Service Register</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <div class="collapse" id="sidebarserviceregister">
+                                    <ul class="nav-second-level">
+                                        <li><a href="<?= base_url() ?>sale/serviceregister"><i class="fas fa-plus-circle"></i> New Entry (IN)</a></li>
+                                        <li><a href="<?= base_url() ?>sale/serviceregisterhistory">All Records</a></li>
+                                        <li><a href="<?= base_url() ?>sale/serviceregisterhistory/0">Pending</a></li>
+                                        <li><a href="<?= base_url() ?>sale/serviceregisterhistory/1">In Progress</a></li>
+                                        <li><a href="<?= base_url() ?>sale/serviceregisterhistory/2">Ready for Pickup</a></li>
+                                        <li><a href="<?= base_url() ?>sale/serviceregisterhistory/3">Delivered</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+
                             <li>
                                 <a href="#sidebarinventory" data-bs-toggle="collapse">
                                     <i data-feather="activity"></i>

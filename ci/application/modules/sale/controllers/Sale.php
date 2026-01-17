@@ -2479,4 +2479,342 @@ class Sale extends MY_Controller {
         $this->load->view('servicebillprintall', $this->data, FALSE);
     }
 
+    // ============================================
+    // SERVICE REGISTER METHODS
+    // ============================================
+
+    /**
+     * Service Register - IN Form (New Entry)
+     */
+    public function serviceregister()
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+        $this->load->model('business/customers_model', 'cstmr');
+
+        $this->data['title'] = 'Service Register - New Entry';
+        $this->data['servicecode'] = $this->srvreg->getnextservicecode($this->buid);
+        $this->data['customerlist'] = $this->cstmr->getactivecustomers($this->buid);
+        $this->data['todaydate'] = date('Y-m-d');
+        $this->data['currenttime'] = date('H:i');
+
+        $this->load->template('serviceregister', $this->data, FALSE);
+    }
+
+    /**
+     * Service Register - Save IN Entry
+     */
+    public function addserviceregister()
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $servicecode = $this->input->post('servicecode');
+        $existcustomer = $this->input->post('existcustomer');
+        $customerid = $this->input->post('customerid');
+        $customername = $this->input->post('customername');
+        $customerphone = $this->input->post('customerphone');
+        $customeraddress = $this->input->post('customeraddress');
+        $printername = $this->input->post('printername');
+        $printertype = $this->input->post('printertype');
+        $serialno = $this->input->post('serialno');
+        $reason = $this->input->post('reason');
+        $indate = $this->input->post('indate');
+        $intime = $this->input->post('intime');
+
+        $insertdata = array(
+            'sr_buid'         => $this->buid,
+            'sr_finyearid'    => $this->finyearid,
+            'sr_code'         => $servicecode,
+            'sr_indate'       => $indate,
+            'sr_intime'       => $intime,
+            'sr_existcustomer'=> $existcustomer,
+            'sr_customerid'   => ($existcustomer == 1) ? $customerid : 0,
+            'sr_customername' => $customername,
+            'sr_phone'        => $customerphone,
+            'sr_address'      => $customeraddress,
+            'sr_printername'  => $printername,
+            'sr_printertype'  => $printertype,
+            'sr_serialno'     => $serialno,
+            'sr_reason'       => $reason,
+            'sr_status'       => 0, // Pending
+            'sr_updatedby'    => $this->loggeduserid,
+            'sr_updatedon'    => $this->updatedon,
+            'sr_isactive'     => 0
+        );
+
+        $insertid = $this->srvreg->insert($insertdata, TRUE);
+
+        if ($insertid) {
+            $this->session->set_flashdata('messageS', 'Service entry added successfully. Code: ' . $servicecode);
+            redirect('sale/serviceregisterhistory');
+        } else {
+            $this->session->set_flashdata('messageE', 'Failed to add service entry. Please try again.');
+            redirect('sale/serviceregister');
+        }
+    }
+
+    /**
+     * Service Register - History/List View
+     */
+    public function serviceregisterhistory($status = 'all', $fromdate = 0, $todate = 0)
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+        $this->load->model('business/customers_model', 'cstmr');
+
+        $this->data['title'] = 'Service Register History';
+
+        if ($fromdate == 0) {
+            $fromdate = date('Y-m-d', strtotime('-30 days'));
+            $todate = date('Y-m-d');
+        } else {
+            $fromdate = date('Y-m-d', strtotime($fromdate));
+            $todate = date('Y-m-d', strtotime($todate));
+        }
+
+        $this->data['fromdate'] = $fromdate;
+        $this->data['todate'] = $todate;
+        $this->data['status'] = $status;
+        $this->data['customerlist'] = $this->cstmr->getactivecustomers($this->buid);
+
+        $this->data['registerlist'] = $this->srvreg->getserviceregisterlist($this->buid, $fromdate, $todate, $status);
+
+        // Get counts for status badges
+        $this->data['pendingcount'] = $this->srvreg->getcountbystatus($this->buid, 0);
+        $this->data['inprogresscount'] = $this->srvreg->getcountbystatus($this->buid, 1);
+        $this->data['completedcount'] = $this->srvreg->getcountbystatus($this->buid, 2);
+        $this->data['deliveredcount'] = $this->srvreg->getcountbystatus($this->buid, 3);
+
+        $this->load->template('serviceregisterhistory', $this->data, FALSE);
+    }
+
+    /**
+     * Service Register - View/Edit Entry
+     */
+    public function serviceregisterview($id, $hash)
+    {
+        if (!$this->validchecksumcheck($id, $hash)) {
+            $this->session->set_flashdata('messageE', 'Invalid request.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+        $this->load->model('business/customers_model', 'cstmr');
+
+        $this->data['title'] = 'Service Register - View Entry';
+        $this->data['entry'] = $this->srvreg->getdetailsbyid($id);
+        $this->data['customerlist'] = $this->cstmr->getactivecustomers($this->buid);
+
+        if (!$this->data['entry']) {
+            $this->session->set_flashdata('messageE', 'Entry not found.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->template('serviceregisterview', $this->data, FALSE);
+    }
+
+    /**
+     * Service Register - Update Status
+     */
+    public function updateservicestatus()
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $id = $this->input->post('id');
+        $status = $this->input->post('status');
+
+        $result = $this->srvreg->updatestatus($id, $status, $this->loggeduserid);
+
+        if ($result) {
+            echo json_encode(array('status' => 'success', 'message' => 'Status updated successfully.'));
+        } else {
+            echo json_encode(array('status' => 'error', 'message' => 'Failed to update status.'));
+        }
+    }
+
+    /**
+     * Service Register - Delivery/OUT Form
+     */
+    public function serviceregisterout($id, $hash)
+    {
+        if (!$this->validchecksumcheck($id, $hash)) {
+            $this->session->set_flashdata('messageE', 'Invalid request.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $this->data['title'] = 'Service Register - Deliver Item';
+        $this->data['entry'] = $this->srvreg->getdetailsbyid($id);
+        $this->data['hash'] = $hash;
+
+        if (!$this->data['entry']) {
+            $this->session->set_flashdata('messageE', 'Entry not found.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        if ($this->data['entry']->sr_status == 3) {
+            $this->session->set_flashdata('messageE', 'This item has already been delivered.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->template('serviceregisterout', $this->data, FALSE);
+    }
+
+    /**
+     * Service Register - Process Delivery
+     */
+    public function processservicedelivery()
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $id = $this->input->post('id');
+        $hash = $this->input->post('hash');
+
+        if (!$this->validchecksumcheck($id, $hash)) {
+            $this->session->set_flashdata('messageE', 'Invalid request.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $remarks = $this->input->post('remarks');
+        $servicecost = $this->input->post('servicecost');
+
+        $updatedata = array(
+            'sr_remarks'     => $remarks,
+            'sr_servicecost' => $servicecost,
+            'sr_updatedby'   => $this->loggeduserid,
+            'sr_updatedon'   => $this->updatedon
+        );
+
+        $result = $this->srvreg->markdelivered($id, $updatedata);
+
+        if ($result) {
+            $this->session->set_flashdata('messageS', 'Item marked as delivered successfully.');
+        } else {
+            $this->session->set_flashdata('messageE', 'Failed to update. Please try again.');
+        }
+
+        redirect('sale/serviceregisterhistory');
+    }
+
+    /**
+     * Service Register - Update Entry
+     */
+    public function updateserviceregister()
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $id = $this->input->post('id');
+        $hash = $this->input->post('hash');
+
+        if (!$this->validchecksumcheck($id, $hash)) {
+            $this->session->set_flashdata('messageE', 'Invalid request.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $existcustomer = $this->input->post('existcustomer');
+        $customerid = $this->input->post('customerid');
+
+        $updatedata = array(
+            'sr_existcustomer'=> $existcustomer,
+            'sr_customerid'   => ($existcustomer == 1) ? $customerid : 0,
+            'sr_customername' => $this->input->post('customername'),
+            'sr_phone'        => $this->input->post('customerphone'),
+            'sr_address'      => $this->input->post('customeraddress'),
+            'sr_printername'  => $this->input->post('printername'),
+            'sr_printertype'  => $this->input->post('printertype'),
+            'sr_serialno'     => $this->input->post('serialno'),
+            'sr_reason'       => $this->input->post('reason'),
+            'sr_status'       => $this->input->post('status'),
+            'sr_remarks'      => $this->input->post('remarks'),
+            'sr_servicecost'  => $this->input->post('servicecost'),
+            'sr_updatedby'    => $this->loggeduserid,
+            'sr_updatedon'    => $this->updatedon
+        );
+
+        $result = $this->srvreg->update($id, $updatedata, TRUE);
+
+        if ($result) {
+            $this->session->set_flashdata('messageS', 'Entry updated successfully.');
+        } else {
+            $this->session->set_flashdata('messageE', 'Failed to update. Please try again.');
+        }
+
+        redirect('sale/serviceregisterhistory');
+    }
+
+    /**
+     * Service Register - Delete Entry (Soft Delete)
+     */
+    public function deleteserviceregister($id, $hash)
+    {
+        if (!$this->validchecksumcheck($id, $hash)) {
+            $this->session->set_flashdata('messageE', 'Invalid request.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $updatedata = array(
+            'sr_isactive'  => 1,
+            'sr_updatedby' => $this->loggeduserid,
+            'sr_updatedon' => $this->updatedon
+        );
+
+        $result = $this->srvreg->update($id, $updatedata, TRUE);
+
+        if ($result) {
+            $this->session->set_flashdata('messageS', 'Entry deleted successfully.');
+        } else {
+            $this->session->set_flashdata('messageE', 'Failed to delete. Please try again.');
+        }
+
+        redirect('sale/serviceregisterhistory');
+    }
+
+    /**
+     * Service Register - Print Receipt
+     */
+    public function serviceregisterprint($id, $hash)
+    {
+        if (!$this->validchecksumcheck($id, $hash)) {
+            $this->session->set_flashdata('messageE', 'Invalid request.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        $this->data['entry'] = $this->srvreg->getdetailsbyid($id);
+        $this->data['businessdet'] = $this->busunt->getbusinessunitdetailbyid($this->buid);
+
+        if (!$this->data['entry']) {
+            $this->session->set_flashdata('messageE', 'Entry not found.');
+            redirect('sale/serviceregisterhistory');
+        }
+
+        $this->load->view('serviceregisterprint', $this->data, FALSE);
+    }
+
+    /**
+     * Service Register - Print Register Report for Date Range
+     */
+    public function serviceregisterreport($status = 'all', $fromdate = 0, $todate = 0)
+    {
+        $this->load->model('sale/Serviceregister_model', 'srvreg');
+
+        if ($fromdate == 0) {
+            $fromdate = date('Y-m-d', strtotime('-30 days'));
+            $todate = date('Y-m-d');
+        } else {
+            $fromdate = date('Y-m-d', strtotime($fromdate));
+            $todate = date('Y-m-d', strtotime($todate));
+        }
+
+        $this->data['fromdate'] = $fromdate;
+        $this->data['todate'] = $todate;
+        $this->data['status'] = $status;
+        $this->data['registerlist'] = $this->srvreg->getserviceregisterlist($this->buid, $fromdate, $todate, $status);
+        $this->data['businessdet'] = $this->busunt->getbusinessunitdetailbyid($this->buid);
+
+        $this->load->view('serviceregisterreport', $this->data, FALSE);
+    }
+
 }
