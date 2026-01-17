@@ -125,8 +125,13 @@ class Serviceregister_model extends MY_Model {
     public function markdelivered($id, $data)
     {
         $data['sr_status'] = 3;
-        $data['sr_outdate'] = date('Y-m-d');
-        $data['sr_outtime'] = date('H:i:s');
+        // Use passed date/time values, fallback to current date/time if not provided
+        if (empty($data['sr_outdate'])) {
+            $data['sr_outdate'] = date('Y-m-d');
+        }
+        if (empty($data['sr_outtime'])) {
+            $data['sr_outtime'] = date('H:i:s');
+        }
 
         return $this->update($id, $data, TRUE);
     }

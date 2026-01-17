@@ -93,16 +93,20 @@
                                 <h5 class="text-success mb-3"><i class="fas fa-check-circle"></i> Complete Delivery</h5>
 
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <label>Service Cost</label>
                                         <div class="input-group">
                                             <span class="input-group-text">Rs.</span>
                                             <input type="number" step="0.01" name="servicecost" id="servicecost" value="<?= $entry->sr_servicecost ?>" class="form-control form-control-lg" placeholder="0.00">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <label>Delivery Date</label>
-                                        <input type="text" class="form-control form-control-lg" value="<?= date('d-M-Y') ?> (Today)" readonly>
+                                        <input type="date" name="outdate" id="outdate" class="form-control form-control-lg" value="<?= date('Y-m-d') ?>">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Delivery Time</label>
+                                        <input type="time" name="outtime" id="outtime" class="form-control form-control-lg" value="<?= date('H:i') ?>">
                                     </div>
                                 </div>
 

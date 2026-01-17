@@ -2714,10 +2714,14 @@ class Sale extends MY_Controller {
 
         $remarks = $this->input->post('remarks');
         $servicecost = $this->input->post('servicecost');
+        $outdate = $this->input->post('outdate');
+        $outtime = $this->input->post('outtime');
 
         $updatedata = array(
             'sr_remarks'     => $remarks,
             'sr_servicecost' => $servicecost,
+            'sr_outdate'     => $outdate ? $outdate : date('Y-m-d'),
+            'sr_outtime'     => $outtime ? $outtime : date('H:i:s'),
             'sr_updatedby'   => $this->loggeduserid,
             'sr_updatedon'   => $this->updatedon
         );
