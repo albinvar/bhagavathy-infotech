@@ -14,14 +14,16 @@
 .status-delivered { background-color: #d1d1d1; color: #383838; }
 
 .status-card {
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 15px;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(0,0,0,0.1);
 }
 .status-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .status-card h3 {
     margin: 0;
@@ -32,10 +34,10 @@
     margin: 5px 0 0 0;
     font-size: 13px;
 }
-.card-pending { background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); }
-.card-inprogress { background: linear-gradient(135deg, #cce5ff 0%, #74b9ff 100%); }
-.card-completed { background: linear-gradient(135deg, #d4edda 0%, #00b894 100%); }
-.card-delivered { background: linear-gradient(135deg, #e2e2e2 0%, #b2bec3 100%); }
+.card-pending { background-color: #fff3cd; color: #856404; }
+.card-inprogress { background-color: #cce5ff; color: #004085; }
+.card-completed { background-color: #d4edda; color: #155724; }
+.card-delivered { background-color: #e9ecef; color: #495057; }
 </style>
 
 <div class="content-page">

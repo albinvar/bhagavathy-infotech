@@ -151,7 +151,7 @@
 
 <!-- Report Header -->
 <div class="report-header">
-    <?php if(isset($businessdet) && $businessdet): ?>
+    <?php if(isset($businessdet) && is_object($businessdet)): ?>
     <h1><?= htmlspecialchars($businessdet->bu_unitname) ?></h1>
     <p><?= htmlspecialchars($businessdet->bu_address) ?> | Phone: <?= htmlspecialchars($businessdet->bu_phone) ?></p>
     <?php endif; ?>
